@@ -12,32 +12,33 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.ArrayList;
-
 public class Plateau extends View implements View.OnTouchListener {
     private boolean mBooleanIsPressed = false;
 
     int dx = 0;
     int dy = 0;
+
     int predx;
     int predy;
-
+    int deck[] = new int[40];
     int plateau[][] = new int[80][80];
     int card=1;
-
-    ArrayList<Bitmap> bitmapArray = new ArrayList<Bitmap>();
+    int cardvalue = 1;
     public Plateau(Context context, AttributeSet attrs) {
         super(context, attrs);
-        for (int i = 0;i<40;i++){
-            for (int j = 0;j<40;j++){
+        this.setOnTouchListener(this);
+        for (int i = 0;i<80;i++){
+            for (int j = 0;j<80;j++){
                 plateau[i][j]=0;
             }
         }
-
-        this.setOnTouchListener(this);
-
+        for (int i =0;i<40;i++){
+            if(i<20){deck[i]= 1;}
+            if(i>=20 && i < 27){deck[i]= 2;}
+            if(i>=27 && i < 31){deck[i]= 3;}
+            if(i>=31){deck[i]= 4;}
+        }
     }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -47,17 +48,23 @@ public class Plateau extends View implements View.OnTouchListener {
         paint.setFilterBitmap(true);
         paint.setDither(true);
         Resources res = getResources();
-        int cardvalue=0;
-        if(card == 1){cardvalue=R.drawable.cat;}
-        if(card == 2){cardvalue=R.drawable.mouse;}
-        if(card == 3){cardvalue=R.drawable.cheese;}
-        if(card == 4){cardvalue=R.drawable.mousetrap;}
-
-        Bitmap bitmap = BitmapFactory.decodeResource(res, cardvalue);
         plateau[40][40] = card;
-
-        canvas.drawBitmap(bitmap, 1000, 1000, paint);
-
+        for (int i = 0;i<80;i++){
+            for (int j = 0;j<80;j++){
+                int tox=2000;
+                int toy=2000;
+                int x = (i * 50) - (tox-(i*50));
+                int y = (i * 50) - (toy-(j*50));
+                if(plateau[i][j] == 1){cardvalue=R.drawable.cat;}
+                if(plateau[i][j] == 2){cardvalue=R.drawable.mouse;}
+                if(plateau[i][j] == 3){cardvalue=R.drawable.cheese;}
+                if(plateau[i][j] == 4){cardvalue=R.drawable.mousetrap;}
+                if(plateau[i][j]!=0){
+                    Bitmap bitmap = BitmapFactory.decodeResource(res, cardvalue);
+                    canvas.drawBitmap(bitmap, x, y, paint);
+                }
+            }
+        }
     }
     private final Handler handler = new Handler();
     private final Runnable runnable = new Runnable() {
@@ -82,23 +89,11 @@ public class Plateau extends View implements View.OnTouchListener {
             handler.postDelayed(runnable, 1000);
             mBooleanIsPressed = true;
 
+
+            fromGraphicToBoard(x,y);
             predx = x;
             predy = y;
-
-            for (int i = 0;i<40;i++){
-                for (int j = 0;j<40;j++){
-                    if(plateau[i][j]!=0){
-                        Paint paint = new Paint();
-                        paint.setAntiAlias(true);
-                        paint.setFilterBitmap(true);
-                        paint.setDither(true);
-                        Canvas canvas = new Canvas();
-                        Resources res = getResources();
-                        Bitmap bitmap = BitmapFactory.decodeResource(res, plateau[i][i]);
-                        canvas.drawBitmap(bitmap, i*50, j*50, paint);
-                    }
-                }
-            }
+            card = deck[0];
 
         }
 
@@ -109,18 +104,15 @@ public class Plateau extends View implements View.OnTouchListener {
 
 
             }
-
-
-
-
             Log.d(" TOUCH", "UP");
-
         }
         if (motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
             //anything happening with event here is the X Y of the raw screen event, relative to the view.
             Log.d(" TOUCH", "MOVE");
             this.dx = predx - x;
             this.dy = predy - y;
+
+
         }
         this.invalidate();
         return true;
