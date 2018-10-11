@@ -8,6 +8,7 @@
     tools:layout_editor_absoluteY="81dp">
 
     <com.example.home.cheesegame.Plateau
+        android:id="@+id/plateauView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
